@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { resend, orderConfirmationEmail } from "@/lib/resend";
 
 export const runtime = "nodejs";
 
@@ -19,20 +20,33 @@ export async function POST(req: Request) {
       .digest("hex");
 
     const isValid = expectedSignature === razorpay_signature;
-
     const supabaseAdmin = getSupabaseAdmin();
-    await supabaseAdmin
+
+    const { data: updatedOrder, error } = await supabaseAdmin
       .from("orders")
       .update({
         razorpay_payment_id,
         razorpay_signature,
         status: isValid ? "paid" : "failed",
-        updated_at: new Date().toISOString(),
       })
-      .eq("razorpay_order_id", razorpay_order_id);
+      .eq("razorpay_order_id", razorpay_order_id)
+      .select()
+      .single();
 
     if (!isValid) {
       return NextResponse.json({ message: "Signature mismatch." }, { status: 400 });
+    }
+
+    // Fire the confirmation email — don't block the response on it failing
+    if (!error && updatedOrder) {
+      resend.emails
+        .send({
+          from: "Flexter <onboarding@resend.dev>", // swap once your domain is verified
+          to: updatedOrder.customer_email,
+          subject: "Your Flexter order is confirmed",
+          html: orderConfirmationEmail(updatedOrder as any),
+        })
+        .catch((e) => console.error("Resend email failed:", e));
     }
 
     return NextResponse.json({ ok: true });
