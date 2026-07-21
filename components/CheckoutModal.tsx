@@ -113,7 +113,16 @@ export default function CheckoutModal() {
                 {submitting ? "Opening payment…" : `Pay ₹${amount.toLocaleString("en-IN")}`}
               </button>
               <p className="text-[11px] text-dim text-center pb-2">
-                Payments are processed securely by Razorpay.
+                Payments are processed securely by Razorpay. By paying, you
+                agree to our{" "}
+                <a href="/terms-of-service" className="underline underline-offset-4 hover:text-paper">
+                  Terms
+                </a>{" "}
+                and{" "}
+                <a href="/refund-policy" className="underline underline-offset-4 hover:text-paper">
+                  Refund Policy
+                </a>
+                .
               </p>
             </form>
           </motion.div>

@@ -2,12 +2,11 @@
 
 import { motion } from "framer-motion";
 import { ArrowDown } from "lucide-react";
-import CompressionField from "./CompressionField";
-import TShirtArt from "./TShirtArt";
+import Image from "next/image";
 
 const container = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.09, delayChildren: 0.15 } },
+  show: { transition: { staggerChildren: 0.09, delayChildren: 0.2 } },
 };
 
 const item = {
@@ -19,16 +18,32 @@ export default function Hero() {
   return (
     <section
       id="top"
-      className="relative min-h-[100dvh] flex flex-col justify-between overflow-hidden pt-16"
+      className="relative min-h-[100dvh] flex flex-col justify-end overflow-hidden"
     >
-      <CompressionField />
+      {/* Full-bleed photo */}
+      <div className="absolute inset-0">
+        <Image
+          src="/images/hero-runner.jpg"
+          alt="Man sprinting in the Flexter Compression Tee and matching compression leggings, black on black"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-[62%_center] sm:object-[68%_18%]"
+        />
+        {/* Rich overlay: bottom-up scrim for text legibility + a cool
+            left-to-right vignette so the tee stays visible while copy
+            still reads clearly over the model. */}
+        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/20 to-transparent" />
+        <div className="absolute inset-0 bg-ink/10" />
+      </div>
 
-      <div className="relative z-10 mx-auto max-w-6xl w-full px-4 sm:px-6 flex-1 flex flex-col lg:flex-row items-center gap-10 lg:gap-6 pt-10 lg:pt-16">
+      <div className="relative z-10 mx-auto max-w-6xl w-full px-4 sm:px-6 pt-28 sm:pt-0">
         <motion.div
           variants={container}
           initial="hidden"
           animate="show"
-          className="flex-1 w-full text-center lg:text-left"
+          className="max-w-xl text-center sm:text-left mx-auto sm:mx-0 pb-16 sm:pb-24"
         >
           <motion.p
             variants={item}
@@ -39,7 +54,7 @@ export default function Hero() {
 
           <motion.h1
             variants={item}
-            className="font-display font-black leading-[0.95] tracking-tight text-[13vw] sm:text-6xl lg:text-7xl xl:text-8xl"
+            className="font-display font-black leading-[0.95] tracking-tight text-[15vw] sm:text-6xl lg:text-7xl xl:text-8xl"
           >
             ENGINEERED
             <br />
@@ -48,7 +63,7 @@ export default function Hero() {
 
           <motion.p
             variants={item}
-            className="mt-6 text-dim text-base sm:text-lg max-w-md mx-auto lg:mx-0"
+            className="mt-6 text-dim text-base sm:text-lg max-w-md mx-auto sm:mx-0"
           >
             The Flexter Compression Tee. Four-way stretch fabric that holds
             muscle in place from warm-up to the last rep.
@@ -56,7 +71,7 @@ export default function Hero() {
 
           <motion.div
             variants={item}
-            className="mt-9 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3"
+            className="mt-9 flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-3"
           >
             <a
               href="#product"
@@ -66,22 +81,11 @@ export default function Hero() {
             </a>
             <a
               href="#specs"
-              className="w-full sm:w-auto text-center px-8 py-3.5 rounded-full border border-line hover:border-paper/40 font-medium text-sm tracking-wide transition-colors"
+              className="w-full sm:w-auto text-center px-8 py-3.5 rounded-full border border-paper/30 hover:border-paper/60 font-medium text-sm tracking-wide transition-colors backdrop-blur-sm"
             >
               Fabric &amp; fit
             </a>
           </motion.div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.92, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="flex-1 w-full max-w-xs sm:max-w-sm lg:max-w-md mx-auto"
-        >
-          <div className="relative glass rounded-[2rem] p-6 sm:p-10 animate-floatSlow">
-            <TShirtArt className="w-full h-auto drop-shadow-[0_30px_60px_rgba(0,0,0,0.6)]" />
-          </div>
         </motion.div>
       </div>
 
