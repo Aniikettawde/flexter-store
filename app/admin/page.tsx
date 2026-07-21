@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
+export const dynamic = "force-dynamic";
+
+
 const STATUS_STYLES: Record<string, string> = {
   paid: "bg-green-500/15 text-green-400",
   created: "bg-yellow-500/15 text-yellow-400",
