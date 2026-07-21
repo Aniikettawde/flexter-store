@@ -12,8 +12,8 @@ export default function SuccessPage() {
           Order confirmed.
         </h1>
         <p className="text-dim text-sm">
-          Your Flexter Compression Tee is being prepared. You'll get a
-          shipping update by email once it's on the way.
+         Your Flexter Compression Tee is being prepared. You&apos;ll get a
+shipping update by email once it&apos;s on the way.
         </p>
         <Link
           href="/"
