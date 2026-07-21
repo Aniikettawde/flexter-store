@@ -23,7 +23,7 @@ export default function Hero() {
       {/* Full-bleed photo */}
       <div className="absolute inset-0">
         <Image
-          src="/images/hero-runner.jpg"
+          src="/images/hero-runner.png"
           alt="Man sprinting in the Flexter Compression Tee and matching compression leggings, black on black"
           fill
           priority
