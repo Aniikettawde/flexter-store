@@ -5,7 +5,7 @@ export const PRODUCT = {
   id: "flexter-compression-tee-black",
   name: "Flexter Compression Tee",
   colorway: "Jet Black",
-  price: 1499, // INR
+  price: 1499,
   currency: "INR",
   sku: "FLX-CMP-001-BLK",
   fabric: "88% Nylon / 12% Elastane, 4-way compression stretch",
@@ -18,5 +18,11 @@ export const PRODUCT = {
     "Sweat-wicking, quick-dry finish",
     "Flatlock seams, zero chafe",
     "Tonal Flexter mark, printed not stitched",
+  ],
+  // NEW — add your product photos here, in the order you want them to appear
+  images: [
+    "/images/product/front.jpg",
+    "/images/product/back.png",
+    "/images/product/detail.jpg",
   ],
 } as const;

@@ -1,8 +1,7 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { ShoppingBag } from "lucide-react";
-import Logo from "./Logo";
+import Image from "next/image";
 import { useCartStore } from "@/lib/cart-store";
 
 export default function Nav() {
@@ -25,12 +24,18 @@ export default function Nav() {
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6 h-16 flex items-center justify-between">
         <a href="#top" className="flex items-center gap-2 group">
-          <Logo className="h-6 w-6 transition-transform duration-300 group-hover:scale-110" />
+          <Image
+            src="/images/logo.png"
+            alt="Flexter"
+            width={28}
+            height={28}
+            className="h-6 w-6 object-contain transition-transform duration-300 group-hover:scale-110"
+            priority
+          />
           <span className="font-display font-bold tracking-wide text-sm sm:text-base">
             FLEXTER
           </span>
         </a>
-
         <nav className="hidden sm:flex items-center gap-8 text-sm text-dim">
           <a href="#product" className="hover:text-paper transition-colors">
             The Tee
@@ -42,7 +47,6 @@ export default function Nav() {
             Shipping
           </a>
         </nav>
-
         <button
           onClick={openDrawer}
           aria-label={`Open bag, ${totalQty} item${totalQty === 1 ? "" : "s"}`}

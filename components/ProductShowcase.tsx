@@ -7,6 +7,8 @@ import TShirtArt from "./TShirtArt";
 import { PRODUCT, SIZES, type Size } from "@/lib/product";
 import { useCartStore } from "@/lib/cart-store";
 import { useCheckoutStore } from "@/lib/checkout-store";
+import ProductGallery from "./ProductGallery";
+
 
 export default function ProductShowcase() {
   const [size, setSize] = useState<Size>("M");
@@ -31,16 +33,16 @@ export default function ProductShowcase() {
       <div className="mx-auto max-w-6xl grid lg:grid-cols-2 gap-14 lg:gap-20 items-start">
         {/* Visual */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="lg:sticky lg:top-28"
-        >
-          <div className="glass rounded-[2rem] p-8 sm:p-12 max-w-sm mx-auto lg:mx-0">
-            <TShirtArt className="w-full h-auto" />
-          </div>
-        </motion.div>
+  initial={{ opacity: 0, y: 30 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true, margin: "-80px" }}
+  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+  className="lg:sticky lg:top-28"
+>
+  <div className="max-w-sm mx-auto lg:mx-0">
+    <ProductGallery images={PRODUCT.images} alt={PRODUCT.name} />
+  </div>
+</motion.div>
 
         {/* Details */}
         <motion.div

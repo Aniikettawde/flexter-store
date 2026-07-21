@@ -1,4 +1,4 @@
-import Logo from "./Logo";
+import Image from "next/image";
 
 export default function Footer() {
   return (
@@ -6,7 +6,13 @@ export default function Footer() {
       <div className="mx-auto max-w-6xl flex flex-col gap-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
           <div className="flex items-center gap-2">
-            <Logo className="h-5 w-5" />
+            <Image
+              src="/images/logo.png"
+              alt="Flexter"
+              width={24}
+              height={24}
+              className="h-5 w-5 object-contain"
+            />
             <span className="font-display font-bold text-sm tracking-wide">
               FLEXTER
             </span>
@@ -14,16 +20,14 @@ export default function Footer() {
           <p className="text-xs text-dim">
             © {new Date().getFullYear()} Flexter. One tee. Zero compromise.
           </p>
-          <a
-            href="mailto:info@flexter.in"
+          
+          <a  href="mailto:info@flexter.in"
             className="text-xs text-dim hover:text-paper transition-colors"
           >
             info@flexter.in
           </a>
         </div>
-
         <div className="hairline" />
-
         <nav className="flex flex-wrap items-center justify-center sm:justify-start gap-x-6 gap-y-2 text-xs text-dim">
           <a href="/privacy-policy" className="hover:text-paper transition-colors">
             Privacy Policy

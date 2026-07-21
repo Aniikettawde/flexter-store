@@ -18,27 +18,33 @@ export default function Hero() {
   return (
     <section
       id="top"
-      className="relative min-h-[100dvh] flex flex-col justify-end overflow-hidden"
+      className="relative overflow-hidden sm:min-h-[100dvh] sm:flex sm:flex-col sm:justify-end"
     >
-      {/* Full-bleed photo */}
-      <div className="absolute inset-0">
+      {/*
+        Mobile: normal-flow block, image's own aspect ratio, fully visible
+        (object-contain), letterboxed cleanly into the black background.
+        Desktop (sm+): full-bleed, absolutely positioned, cropped to fill.
+      */}
+      <div className="relative w-full aspect-[3/2] sm:aspect-auto sm:absolute sm:inset-0">
         <Image
           src="/images/hero-runner.png"
           alt="Man sprinting in the Flexter Compression Tee and matching compression leggings, black on black"
           fill
           priority
           sizes="100vw"
-          className="object-cover object-[62%_center] sm:object-[68%_18%]"
+          className="object-contain sm:object-cover object-center sm:object-[68%_18%]"
         />
-        {/* Rich overlay: bottom-up scrim for text legibility + a cool
-            left-to-right vignette so the tee stays visible while copy
-            still reads clearly over the model. */}
-        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/10" />
-        <div className="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/20 to-transparent" />
-        <div className="absolute inset-0 bg-ink/10" />
+        {/* Overlay gradients — desktop only. On mobile the photo isn't
+            underneath the text, so no scrim is needed there. */}
+        <div className="hidden sm:block absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/10" />
+        <div className="hidden sm:block absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/20 to-transparent" />
+        <div className="hidden sm:block absolute inset-0 bg-ink/10" />
+        {/* Soft fade at the bottom edge on mobile so the image blends
+            into the black background instead of ending on a hard line. */}
+        <div className="sm:hidden absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-ink to-transparent" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-6xl w-full px-4 sm:px-6 pt-28 sm:pt-0">
+      <div className="relative z-10 mx-auto max-w-6xl w-full px-4 sm:px-6 pt-10 sm:pt-0">
         <motion.div
           variants={container}
           initial="hidden"
@@ -73,14 +79,14 @@ export default function Hero() {
             variants={item}
             className="mt-9 flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-3"
           >
-            <a
-              href="#product"
+            
+              <a href="#product"
               className="w-full sm:w-auto text-center px-8 py-3.5 rounded-full bg-paper text-ink font-medium text-sm tracking-wide hover:bg-white transition-colors"
             >
               Shop the tee — ₹1,499
             </a>
-            <a
-              href="#specs"
+            
+             <a href="#specs"
               className="w-full sm:w-auto text-center px-8 py-3.5 rounded-full border border-paper/30 hover:border-paper/60 font-medium text-sm tracking-wide transition-colors backdrop-blur-sm"
             >
               Fabric &amp; fit
@@ -94,7 +100,7 @@ export default function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.1, duration: 0.6 }}
-        className="relative z-10 mx-auto mb-8 flex flex-col items-center gap-2 text-dim text-xs tracking-widest uppercase"
+        className="relative z-10 mx-auto mb-8 hidden sm:flex flex-col items-center gap-2 text-dim text-xs tracking-widest uppercase"
         aria-label="Scroll to product details"
       >
         Scroll
