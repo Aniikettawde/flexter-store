@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { resend, orderConfirmationEmail } from "@/lib/resend";
 
 // Keep this in sync with the check in CheckoutModal.tsx — client-side
 // validation can always be bypassed, so re-check on the server too.
@@ -76,8 +77,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Could not place order" }, { status: 500 });
   }
 
-  // TODO: notify yourself of the new COD order — e.g. email/WhatsApp/Slack —
-  // since there's no payment webhook to trigger fulfillment for COD.
+  // Fire-and-forget — a failed email shouldn't fail an already-placed order.
+  resend.emails
+    .send({
+      from: "Flexter <info@flexter.in>", // swap once your domain is verified
+      to: data.customer_email,
+      subject: "Your Flexter order is confirmed",
+      html: orderConfirmationEmail(data as any),
+    })
+    .catch((e) => console.error("Resend email failed:", e));
 
   return NextResponse.json({ order: data }, { status: 201 });
 }

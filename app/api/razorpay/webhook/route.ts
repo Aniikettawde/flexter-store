@@ -42,7 +42,7 @@ export async function POST(req: Request) {
       if (updated) {
         resend.emails
           .send({
-            from: "Flexter <onboarding@resend.dev>",
+            from: "Flexter <info@flexter.in>",
             to: updated.customer_email,
             subject: "Your Flexter order is confirmed",
             html: orderConfirmationEmail(updated as any),
