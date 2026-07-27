@@ -21,8 +21,9 @@ export const PRODUCT = {
   ],
   // NEW — add your product photos here, in the order you want them to appear
   images: [
-    "/images/product/front.jpg",
+    "/images/product/front.png",
     "/images/product/back.png",
-    "/images/product/detail.jpg",
-  ],
+    "/images/product/detail.png",
+	"/images/product/gym.png",
+ ],
 } as const;
