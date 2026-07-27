@@ -14,7 +14,6 @@ import ProductGallery from "./ProductGallery";
 // the display here — the strike-through MRP is kept separate.
 const SALE_PRICE = 699;
 const MRP = 1499;
-const STOCK_PER_SIZE = 5;
 
 const SALE_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -57,6 +56,16 @@ export default function ProductShowcase() {
   const addToCart = useCartStore((s) => s.addToCart);
   const openCheckout = useCheckoutStore((s) => s.open);
 
+  const [inventory, setInventory] = useState<Record<Size, number> | null>(null);
+
+  useEffect(() => {
+    fetch("/api/inventory")
+      .then((r) => r.json())
+      .then((d) => setInventory(d.inventory))
+      .catch(() => setInventory(null));
+  }, []);
+
+  const stockFor = (s: Size | null) => (s ? inventory?.[s] ?? 0 : 0);
 
   const requireSize = () => {
     if (!size) {
@@ -98,6 +107,7 @@ export default function ProductShowcase() {
 
   const handleAddToCart = () => {
     if (!requireSize()) return;
+    if (stockFor(size) === 0) return;
     addToCart(size!, qty);
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1600);
@@ -105,6 +115,7 @@ export default function ProductShowcase() {
 
   const handleBuyNow = () => {
     if (!requireSize()) return;
+    if (stockFor(size) === 0) return;
     openCheckout([{ size: size!, qty }]);
   };
 
@@ -113,16 +124,16 @@ export default function ProductShowcase() {
       <div className="mx-auto max-w-6xl grid lg:grid-cols-2 gap-14 lg:gap-20 items-start">
         {/* Visual */}
         <motion.div
-  initial={{ opacity: 0, y: 30 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  viewport={{ once: true, margin: "-80px" }}
-  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-  className="lg:sticky lg:top-28"
->
-  <div className="max-w-sm mx-auto lg:mx-0">
-    <ProductGallery images={PRODUCT.images} alt={PRODUCT.name} />
-  </div>
-</motion.div>
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="lg:sticky lg:top-28"
+        >
+          <div className="max-w-sm mx-auto lg:mx-0">
+            <ProductGallery images={PRODUCT.images} alt={PRODUCT.name} />
+          </div>
+        </motion.div>
 
         {/* Details */}
         <motion.div
@@ -209,26 +220,34 @@ export default function ProductShowcase() {
               transition={{ duration: 0.4 }}
               className="flex flex-wrap gap-2"
             >
-              {SIZES.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => handleSelectSize(s)}
-                  aria-pressed={size === s}
-                  className={`h-11 min-w-[2.75rem] px-3 rounded-full border text-sm font-medium transition-all ${
-                    size === s
-                      ? "bg-paper text-ink border-paper"
-                      : sizeError
-                      ? "border-red-400/60 text-paper"
-                      : "border-line text-paper hover:border-paper/50"
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
+              {SIZES.map((s) => {
+                const outOfStock = inventory !== null && stockFor(s) === 0;
+                return (
+                  <button
+                    key={s}
+                    onClick={() => !outOfStock && handleSelectSize(s)}
+                    disabled={outOfStock}
+                    aria-pressed={size === s}
+                    className={`h-11 min-w-[2.75rem] px-3 rounded-full border text-sm font-medium transition-all ${
+                      outOfStock
+                        ? "opacity-30 cursor-not-allowed border-line text-paper"
+                        : size === s
+                        ? "bg-paper text-ink border-paper"
+                        : sizeError
+                        ? "border-red-400/60 text-paper"
+                        : "border-line text-paper hover:border-paper/50"
+                    }`}
+                  >
+                    {s}
+                  </button>
+                );
+              })}
             </motion.div>
             {size && (
               <p className="text-xs text-dim mt-2.5">
-                {STOCK_PER_SIZE} in stock in size {size}
+                {stockFor(size) > 0
+                  ? `${stockFor(size)} in stock in size ${size}`
+                  : `Out of stock in size ${size}`}
               </p>
             )}
           </div>
@@ -248,9 +267,9 @@ export default function ProductShowcase() {
               </button>
               <span className="font-mono w-4 text-center">{qty}</span>
               <button
-                onClick={() => setQty((q) => Math.min(STOCK_PER_SIZE, q + 1))}
+                onClick={() => setQty((q) => Math.min(stockFor(size), q + 1))}
                 aria-label="Increase quantity"
-                disabled={qty >= STOCK_PER_SIZE}
+                disabled={!size || qty >= stockFor(size)}
                 className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-white/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <Plus className="h-3.5 w-3.5" />
@@ -262,7 +281,8 @@ export default function ProductShowcase() {
           <div className="hidden sm:flex gap-3 mt-10">
             <button
               onClick={handleAddToCart}
-              className="flex-1 h-14 rounded-full border border-line hover:border-paper/50 font-medium text-sm tracking-wide transition-colors relative overflow-hidden"
+              disabled={!!size && stockFor(size) === 0}
+              className="flex-1 h-14 rounded-full border border-line hover:border-paper/50 font-medium text-sm tracking-wide transition-colors relative overflow-hidden disabled:opacity-30 disabled:cursor-not-allowed"
             >
               {justAdded ? (
                 <span className="flex items-center justify-center gap-2">
@@ -274,7 +294,8 @@ export default function ProductShowcase() {
             </button>
             <button
               onClick={handleBuyNow}
-              className="flex-1 h-14 rounded-full bg-paper text-ink hover:bg-white font-medium text-sm tracking-wide transition-colors"
+              disabled={!!size && stockFor(size) === 0}
+              className="flex-1 h-14 rounded-full bg-paper text-ink hover:bg-white font-medium text-sm tracking-wide transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
               Buy now
             </button>
@@ -305,7 +326,8 @@ export default function ProductShowcase() {
           </div>
           <button
             onClick={handleAddToCart}
-            className="flex-1 h-12 rounded-full border border-line font-medium text-sm active:scale-[0.97] transition-transform"
+            disabled={!!size && stockFor(size) === 0}
+            className="flex-1 h-12 rounded-full border border-line font-medium text-sm active:scale-[0.97] transition-transform disabled:opacity-30 disabled:cursor-not-allowed"
           >
             {justAdded ? (
               <span className="flex items-center justify-center gap-2">
@@ -317,7 +339,8 @@ export default function ProductShowcase() {
           </button>
           <button
             onClick={handleBuyNow}
-            className="flex-1 h-12 rounded-full bg-paper text-ink font-medium text-sm active:scale-[0.97] transition-transform"
+            disabled={!!size && stockFor(size) === 0}
+            className="flex-1 h-12 rounded-full bg-paper text-ink font-medium text-sm active:scale-[0.97] transition-transform disabled:opacity-30 disabled:cursor-not-allowed"
           >
             Buy now
           </button>

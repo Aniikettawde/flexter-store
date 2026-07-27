@@ -103,3 +103,5 @@ textarea:focus-visible {
     transition-duration: 0.001ms !important;
   }
 }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
