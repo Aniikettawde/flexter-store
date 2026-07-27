@@ -6,6 +6,9 @@ import {
   ADMIN_COOKIE_MAX_AGE,
 } from "@/lib/admin-auth";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 async function login(formData: FormData) {
   "use server";
   const password = formData.get("password");

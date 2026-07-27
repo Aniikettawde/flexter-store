@@ -2,13 +2,20 @@ import Link from "next/link";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
-
+export const revalidate = 0;
 
 const STATUS_STYLES: Record<string, string> = {
   paid: "bg-green-500/15 text-green-400",
   created: "bg-yellow-500/15 text-yellow-400",
   failed: "bg-red-500/15 text-red-400",
+  cod_pending: "bg-blue-500/15 text-blue-400",
 };
+
+const STATUS_LABELS: Record<string, string> = {
+  cod_pending: "COD pending",
+};
+
+const statusLabel = (s: string) => STATUS_LABELS[s] ?? s.charAt(0).toUpperCase() + s.slice(1);
 
 export default async function AdminOrdersPage({
   searchParams,
@@ -31,6 +38,10 @@ export default async function AdminOrdersPage({
     .filter((o) => o.status === "paid")
     .reduce((sum, o) => sum + o.amount, 0);
 
+  const codPendingValue = (orders || [])
+    .filter((o) => o.status === "cod_pending")
+    .reduce((sum, o) => sum + o.amount, 0);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -40,11 +51,16 @@ export default async function AdminOrdersPage({
           <span className="font-mono text-paper">
             ₹{(totalRevenue / 100).toLocaleString("en-IN")} revenue
           </span>
+          {codPendingValue > 0 && (
+            <span className="font-mono text-blue-400">
+              ₹{(codPendingValue / 100).toLocaleString("en-IN")} COD pending
+            </span>
+          )}
         </div>
       </div>
 
       <div className="flex gap-2 text-xs">
-        {["all", "paid", "created", "failed"].map((s) => (
+        {["all", "paid", "created", "cod_pending", "failed"].map((s) => (
           <Link
             key={s}
             href={s === "all" ? "/admin" : `/admin?status=${s}`}
@@ -54,7 +70,7 @@ export default async function AdminOrdersPage({
                 : "border-line text-dim hover:text-paper"
             }`}
           >
-            {s === "all" ? "All" : s.charAt(0).toUpperCase() + s.slice(1)}
+            {s === "all" ? "All" : statusLabel(s)}
           </Link>
         ))}
       </div>
@@ -71,6 +87,7 @@ export default async function AdminOrdersPage({
               <th className="px-4 py-3 font-normal">Customer</th>
               <th className="px-4 py-3 font-normal">Items</th>
               <th className="px-4 py-3 font-normal">Amount</th>
+              <th className="px-4 py-3 font-normal">Payment</th>
               <th className="px-4 py-3 font-normal">Status</th>
               <th className="px-4 py-3 font-normal">Date</th>
             </tr>
@@ -86,7 +103,9 @@ export default async function AdminOrdersPage({
                     href={`/admin/orders/${order.id}`}
                     className="font-mono text-xs hover:underline"
                   >
-                    {order.razorpay_order_id.slice(-10)}
+                    {order.payment_method === "cod"
+                      ? `COD-${order.id.slice(-8)}`
+                      : order.razorpay_order_id.slice(-10)}
                   </Link>
                 </td>
                 <td className="px-4 py-3">
@@ -101,13 +120,16 @@ export default async function AdminOrdersPage({
                 <td className="px-4 py-3 font-mono">
                   ₹{(order.amount / 100).toLocaleString("en-IN")}
                 </td>
+                <td className="px-4 py-3 text-xs text-dim">
+                  {order.payment_method === "cod" ? "COD" : "Online"}
+                </td>
                 <td className="px-4 py-3">
                   <span
                     className={`px-2 py-1 rounded-full text-xs ${
                       STATUS_STYLES[order.status] || "bg-white/10 text-dim"
                     }`}
                   >
-                    {order.status}
+                    {statusLabel(order.status)}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-xs text-dim">

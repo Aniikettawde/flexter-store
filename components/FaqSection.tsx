@@ -15,7 +15,11 @@ const FAQS = [
   },
   {
     q: "Is cash on delivery available?",
-    a: "Not currently — all orders are prepaid and processed securely through Razorpay.",
+    a: "Yes — for Pune addresses (pincodes starting with 411) you can pay online via Razorpay or choose cash on delivery at checkout.",
+  },
+  {
+    q: "Do you deliver outside Pune?",
+    a: "Not yet. We currently ship only within Pune (pincodes starting with 411) — we're working on expanding soon.",
   },
   {
     q: "Do you restock sizes?",

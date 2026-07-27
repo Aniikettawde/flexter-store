@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 
 export default async function AdminOrderDetailPage({
@@ -37,7 +38,7 @@ export default async function AdminOrderDetailPage({
 
       <div className="flex items-center justify-between">
         <h1 className="font-display font-bold text-xl">
-          Order {order.razorpay_order_id}
+          Order {order.payment_method === "cod" ? `COD-${order.id.slice(-8)}` : order.razorpay_order_id}
         </h1>
         <span
           className={`px-3 py-1 rounded-full text-xs ${
@@ -45,10 +46,12 @@ export default async function AdminOrderDetailPage({
               ? "bg-green-500/15 text-green-400"
               : order.status === "failed"
               ? "bg-red-500/15 text-red-400"
+              : order.status === "cod_pending"
+              ? "bg-blue-500/15 text-blue-400"
               : "bg-yellow-500/15 text-yellow-400"
           }`}
         >
-          {order.status}
+          {order.status === "cod_pending" ? "COD pending" : order.status}
         </span>
       </div>
 
@@ -91,14 +94,32 @@ export default async function AdminOrderDetailPage({
         <div className="glass-strong rounded-2xl p-6 space-y-3">
           <h2 className="text-xs uppercase tracking-widest text-dim">Payment</h2>
           <p className="text-xs text-dim">
-            Order ID: <span className="font-mono text-paper">{order.razorpay_order_id}</span>
-          </p>
-          <p className="text-xs text-dim">
-            Payment ID:{" "}
+            Method:{" "}
             <span className="font-mono text-paper">
-              {order.razorpay_payment_id || "—"}
+              {order.payment_method === "cod" ? "Cash on delivery" : "Online (Razorpay)"}
             </span>
           </p>
+          {order.payment_method === "cod" ? (
+            <p className="text-xs text-dim">
+              Collect{" "}
+              <span className="font-mono text-paper">
+                ₹{(order.amount / 100).toLocaleString("en-IN")}
+              </span>{" "}
+              in cash on delivery.
+            </p>
+          ) : (
+            <>
+              <p className="text-xs text-dim">
+                Order ID: <span className="font-mono text-paper">{order.razorpay_order_id}</span>
+              </p>
+              <p className="text-xs text-dim">
+                Payment ID:{" "}
+                <span className="font-mono text-paper">
+                  {order.razorpay_payment_id || "—"}
+                </span>
+              </p>
+            </>
+          )}
           <p className="text-xs text-dim">
             Created:{" "}
             {new Date(order.created_at).toLocaleString("en-IN")}

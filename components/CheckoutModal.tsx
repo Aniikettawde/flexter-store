@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
@@ -19,6 +19,11 @@ const emptyForm = {
   pincode: "",
 };
 
+// We currently only ship out of Pune — every serviceable pincode starts with 411.
+const isServiceablePincode = (pincode: string) => /^411\d{3}$/.test(pincode.trim());
+
+type PaymentMethod = "prepaid" | "cod";
+
 export default function CheckoutModal() {
   const { isOpen, lines, close } = useCheckoutStore();
   const clearCart = useCartStore((s) => s.clearCart);
@@ -26,29 +31,79 @@ export default function CheckoutModal() {
 
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
+  const [pincodeError, setPincodeError] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("prepaid");
+  // Synchronous guard — React state updates aren't immediate, so a fast
+  // double-click/tap could fire handleSubmit twice before `submitting`
+  // re-renders. This ref blocks the second call the instant it happens.
+  const isSubmittingRef = useRef(false);
 
   const amount = lines.reduce((sum, l) => sum + l.qty * PRODUCT.price, 0);
+  const pincodeValid = isServiceablePincode(form.pincode);
 
-  const handleChange = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm((f) => ({ ...f, [key]: e.target.value }));
+  const handleChange = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setForm((f) => ({ ...f, [key]: value }));
+    if (key === "pincode") setPincodeError(false);
+  };
+
+  const handlePincodeBlur = () => {
+    if (form.pincode.trim().length > 0) {
+      setPincodeError(!isServiceablePincode(form.pincode));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isSubmittingRef.current) return; // a request is already in flight
+    if (!pincodeValid) {
+      setPincodeError(true);
+      document
+        .getElementById("pincode-field")
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    isSubmittingRef.current = true;
     setSubmitting(true);
     try {
-      await startRazorpayCheckout({
-        items: lines.map((l) => ({ size: l.size, qty: l.qty, price: PRODUCT.price })),
-        customer: form,
-        onSuccess: () => {
-          clearCart();
-          close();
-          setForm(emptyForm);
-          router.push("/checkout/success");
-        },
-        onDismiss: () => setSubmitting(false),
-      });
+      if (paymentMethod === "cod") {
+        const res = await fetch("/api/orders/cod", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: lines.map((l) => ({ size: l.size, qty: l.qty, price: PRODUCT.price })),
+            customer: form,
+            amount,
+          }),
+        });
+        if (!res.ok) throw new Error("Failed to place COD order");
+        clearCart();
+        close();
+        setForm(emptyForm);
+        router.push("/checkout/success?method=cod");
+      } else {
+        await startRazorpayCheckout({
+          items: lines.map((l) => ({ size: l.size, qty: l.qty, price: PRODUCT.price })),
+          customer: form,
+          onSuccess: () => {
+            clearCart();
+            close();
+            setForm(emptyForm);
+            router.push("/checkout/success?method=prepaid");
+          },
+          onDismiss: () => {
+            setSubmitting(false);
+            isSubmittingRef.current = false;
+          },
+        });
+      }
+    } catch (err) {
+      console.error(err);
     } finally {
       setSubmitting(false);
+      isSubmittingRef.current = false;
     }
   };
 
@@ -93,6 +148,10 @@ export default function CheckoutModal() {
                 <span className="font-mono">₹{amount.toLocaleString("en-IN")}</span>
               </div>
 
+              <p className="text-xs text-dim bg-white/[0.03] border border-line rounded-xl px-3.5 py-2.5">
+                We currently deliver only within Pune (pincodes starting with 411).
+              </p>
+
               <Field label="Full name" value={form.name} onChange={handleChange("name")} required />
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Email" type="email" value={form.email} onChange={handleChange("email")} required />
@@ -102,19 +161,82 @@ export default function CheckoutModal() {
               <div className="grid grid-cols-3 gap-3">
                 <Field label="City" value={form.city} onChange={handleChange("city")} required />
                 <Field label="State" value={form.state} onChange={handleChange("state")} required />
-                <Field label="Pincode" value={form.pincode} onChange={handleChange("pincode")} required />
+                <div id="pincode-field">
+                  <Field
+                    label="Pincode"
+                    value={form.pincode}
+                    onChange={handleChange("pincode")}
+                    onBlur={handlePincodeBlur}
+                    required
+                    error={pincodeError}
+                    inputMode="numeric"
+                    maxLength={6}
+                  />
+                </div>
+              </div>
+              {pincodeError && (
+                <motion.p
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-xs text-red-400 -mt-2"
+                >
+                  Sorry, we only deliver in Pune right now (pincode must start
+                  with 411).
+                </motion.p>
+              )}
+
+              <div>
+                <p className="text-xs uppercase tracking-widest text-dim mb-2 mt-2">
+                  Payment method
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("prepaid")}
+                    aria-pressed={paymentMethod === "prepaid"}
+                    className={`h-12 rounded-xl border text-sm font-medium transition-colors ${
+                      paymentMethod === "prepaid"
+                        ? "bg-paper text-ink border-paper"
+                        : "border-line text-paper hover:border-paper/50"
+                    }`}
+                  >
+                    Pay online
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("cod")}
+                    aria-pressed={paymentMethod === "cod"}
+                    className={`h-12 rounded-xl border text-sm font-medium transition-colors ${
+                      paymentMethod === "cod"
+                        ? "bg-paper text-ink border-paper"
+                        : "border-line text-paper hover:border-paper/50"
+                    }`}
+                  >
+                    Cash on delivery
+                  </button>
+                </div>
               </div>
 
               <button
                 type="submit"
-                disabled={submitting || lines.length === 0}
-                className="w-full h-14 rounded-full bg-paper text-ink font-medium text-sm tracking-wide hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                disabled={submitting || lines.length === 0 || !pincodeValid}
+                className="w-full h-14 rounded-full bg-paper text-ink font-medium text-sm tracking-wide hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed mt-2"
               >
-                {submitting ? "Opening payment…" : `Pay ₹${amount.toLocaleString("en-IN")}`}
+                {submitting
+                  ? paymentMethod === "cod"
+                    ? "Placing order…"
+                    : "Opening payment…"
+                  : !pincodeValid
+                  ? "Enter a valid Pune pincode"
+                  : paymentMethod === "cod"
+                  ? `Place order · Pay ₹${amount.toLocaleString("en-IN")} on delivery`
+                  : `Pay ₹${amount.toLocaleString("en-IN")}`}
               </button>
               <p className="text-[11px] text-dim text-center pb-2">
-                Payments are processed securely by Razorpay. By paying, you
-                agree to our{" "}
+                {paymentMethod === "cod"
+                  ? "Cash on delivery orders are confirmed by our team before dispatch."
+                  : "Payments are processed securely by Razorpay."}{" "}
+                By ordering, you agree to our{" "}
                 <a href="/terms-of-service" className="underline underline-offset-4 hover:text-paper">
                   Terms
                 </a>{" "}
@@ -136,14 +258,22 @@ function Field({
   label,
   value,
   onChange,
+  onBlur,
   type = "text",
   required = false,
+  error = false,
+  inputMode,
+  maxLength,
 }: {
   label: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: () => void;
   type?: string;
   required?: boolean;
+  error?: boolean;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+  maxLength?: number;
 }) {
   return (
     <label className="block">
@@ -154,8 +284,15 @@ function Field({
         type={type}
         value={value}
         onChange={onChange}
+        onBlur={onBlur}
         required={required}
-        className="w-full h-11 rounded-xl bg-white/[0.04] border border-line px-3.5 text-sm focus:border-paper/40 outline-none transition-colors"
+        inputMode={inputMode}
+        maxLength={maxLength}
+        className={`w-full h-11 rounded-xl bg-white/[0.04] border px-3.5 text-sm outline-none transition-colors ${
+          error
+            ? "border-red-400/60 focus:border-red-400"
+            : "border-line focus:border-paper/40"
+        }`}
       />
     </label>
   );
