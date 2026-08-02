@@ -4,7 +4,7 @@ export const resend = new Resend(process.env.RESEND_API_KEY);
 
 export function orderConfirmationEmail(order: {
   customer_name: string;
-  razorpay_order_id: string;
+  order_number: string;
   amount: number;
   items: { size: string; qty: number; price: number }[];
   shipping_address: { address: string; city: string; state: string; pincode: string };
@@ -38,7 +38,8 @@ export function orderConfirmationEmail(order: {
         ${order.shipping_address.city}, ${order.shipping_address.state} - ${order.shipping_address.pincode}
       </p>
       <p style="margin-top:24px; font-size:12px; color:#666;">
-        Order ID: ${order.razorpay_order_id}
+        Order number: <strong>${order.order_number}</strong><br/>
+        Quote this number if you need to reach us about this order.
       </p>
     </div>
   `;

@@ -1,11 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Minus, Plus, ShoppingBag } from "lucide-react";
 import { useCartStore } from "@/lib/cart-store";
 import { useCheckoutStore } from "@/lib/checkout-store";
 import { PRODUCT } from "@/lib/product";
-import TShirtArt from "./TShirtArt";
 
 export default function CartDrawer() {
   const { isDrawerOpen, closeDrawer, lines, updateQty, totalAmount } =
@@ -67,8 +67,14 @@ export default function CartDrawer() {
                 <ul className="space-y-5">
                   {lines.map((line) => (
                     <li key={line.size} className="flex gap-4">
-                      <div className="h-20 w-20 shrink-0 rounded-xl glass p-2">
-                        <TShirtArt className="w-full h-full" />
+                      <div className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden glass">
+                        <Image
+                          src={PRODUCT.images[0]}
+                          alt={PRODUCT.name}
+                          fill
+                          sizes="80px"
+                          className="object-cover"
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium">{PRODUCT.name}</p>
@@ -116,7 +122,7 @@ export default function CartDrawer() {
                 </div>
                 <button
                   onClick={handleCheckout}
-                  className="w-full h-13 sm:h-12 rounded-full bg-paper text-ink font-medium text-sm py-3.5 hover:bg-white transition-colors"
+                  className="w-full h-14 sm:h-12 rounded-full bg-paper text-ink font-medium text-sm hover:bg-white transition-colors"
                 >
                   Checkout
                 </button>

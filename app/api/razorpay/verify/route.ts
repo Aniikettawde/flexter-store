@@ -20,8 +20,8 @@ export async function POST(req: Request) {
       .digest("hex");
 
     const isValid = expectedSignature === razorpay_signature;
-    const supabaseAdmin = getSupabaseAdmin();
 
+    const supabaseAdmin = getSupabaseAdmin();
     const { data: updatedOrder, error } = await supabaseAdmin
       .from("orders")
       .update({
@@ -41,15 +41,18 @@ export async function POST(req: Request) {
     if (!error && updatedOrder) {
       resend.emails
         .send({
-          from: "Flexter <onboarding@resend.dev>", // swap once your domain is verified
+          from: "Flexter <info@flexter.in>", // swap once your domain is verified
           to: updatedOrder.customer_email,
-          subject: "Your Flexter order is confirmed",
+          subject: `Order ${updatedOrder.order_number} confirmed`,
           html: orderConfirmationEmail(updatedOrder as any),
         })
         .catch((e) => console.error("Resend email failed:", e));
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({
+      ok: true,
+      order_number: updatedOrder?.order_number ?? null,
+    });
   } catch (err) {
     console.error("Razorpay verify error:", err);
     return NextResponse.json({ message: "Verification failed." }, { status: 500 });

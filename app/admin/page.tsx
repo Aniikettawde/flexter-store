@@ -103,9 +103,10 @@ export default async function AdminOrdersPage({
                     href={`/admin/orders/${order.id}`}
                     className="font-mono text-xs hover:underline"
                   >
-                    {order.payment_method === "cod"
-                      ? `COD-${order.id.slice(-8)}`
-                      : order.razorpay_order_id.slice(-10)}
+                    {order.order_number ??
+                      (order.payment_method === "cod"
+                        ? `COD-${order.id.slice(-8)}`
+                        : order.razorpay_order_id.slice(-10))}
                   </Link>
                 </td>
                 <td className="px-4 py-3">

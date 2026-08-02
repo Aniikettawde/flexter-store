@@ -5,7 +5,6 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-
 export default async function AdminOrderDetailPage({
   params,
 }: {
@@ -30,6 +29,12 @@ export default async function AdminOrderDetailPage({
   };
   const items = order.items as { size: string; qty: number; price: number }[];
 
+  const displayRef =
+    order.order_number ??
+    (order.payment_method === "cod"
+      ? `COD-${order.id.slice(-8)}`
+      : order.razorpay_order_id);
+
   return (
     <div className="space-y-6">
       <Link href="/admin" className="text-xs text-dim hover:text-paper">
@@ -37,8 +42,8 @@ export default async function AdminOrderDetailPage({
       </Link>
 
       <div className="flex items-center justify-between">
-        <h1 className="font-display font-bold text-xl">
-          Order {order.payment_method === "cod" ? `COD-${order.id.slice(-8)}` : order.razorpay_order_id}
+        <h1 className="font-display font-bold text-xl font-mono">
+          Order {displayRef}
         </h1>
         <span
           className={`px-3 py-1 rounded-full text-xs ${
@@ -94,6 +99,10 @@ export default async function AdminOrderDetailPage({
         <div className="glass-strong rounded-2xl p-6 space-y-3">
           <h2 className="text-xs uppercase tracking-widest text-dim">Payment</h2>
           <p className="text-xs text-dim">
+            Order number:{" "}
+            <span className="font-mono text-paper">{order.order_number ?? "—"}</span>
+          </p>
+          <p className="text-xs text-dim">
             Method:{" "}
             <span className="font-mono text-paper">
               {order.payment_method === "cod" ? "Cash on delivery" : "Online (Razorpay)"}
@@ -110,7 +119,8 @@ export default async function AdminOrderDetailPage({
           ) : (
             <>
               <p className="text-xs text-dim">
-                Order ID: <span className="font-mono text-paper">{order.razorpay_order_id}</span>
+                Razorpay order ID:{" "}
+                <span className="font-mono text-paper">{order.razorpay_order_id}</span>
               </p>
               <p className="text-xs text-dim">
                 Payment ID:{" "}

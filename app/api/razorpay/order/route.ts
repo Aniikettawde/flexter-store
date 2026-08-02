@@ -51,22 +51,26 @@ export async function POST(req: Request) {
     });
 
     const supabaseAdmin = getSupabaseAdmin();
-    const { error } = await supabaseAdmin.from("orders").insert({
-      razorpay_order_id: order.id,
-      status: "created",
-      amount: amountInPaise,
-      currency: "INR",
-      customer_name: customer.name,
-      customer_email: customer.email,
-      customer_phone: customer.phone,
-      shipping_address: {
-        address: customer.address,
-        city: customer.city,
-        state: customer.state,
-        pincode: customer.pincode,
-      },
-      items: items.map((i) => ({ ...i, price: PRODUCT.price })),
-    });
+    const { data: dbOrder, error } = await supabaseAdmin
+      .from("orders")
+      .insert({
+        razorpay_order_id: order.id,
+        status: "created",
+        amount: amountInPaise,
+        currency: "INR",
+        customer_name: customer.name,
+        customer_email: customer.email,
+        customer_phone: customer.phone,
+        shipping_address: {
+          address: customer.address,
+          city: customer.city,
+          state: customer.state,
+          pincode: customer.pincode,
+        },
+        items: items.map((i) => ({ ...i, price: PRODUCT.price })),
+      })
+      .select()
+      .single();
 
     if (error) {
       console.error("Supabase insert error:", error);
@@ -78,6 +82,9 @@ export async function POST(req: Request) {
       id: order.id,
       amount: order.amount,
       currency: order.currency,
+      // order_number is assigned by the DB trigger on insert — surfaced here
+      // so the client can reference it even before payment completes.
+      order_number: dbOrder?.order_number ?? null,
     });
   } catch (err) {
     console.error("Razorpay order error:", err);

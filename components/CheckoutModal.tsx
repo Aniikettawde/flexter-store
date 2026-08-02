@@ -24,6 +24,12 @@ const isServiceablePincode = (pincode: string) => /^411\d{3}$/.test(pincode.trim
 
 type PaymentMethod = "prepaid" | "cod";
 
+function successUrl(method: PaymentMethod, orderNumber?: string | null) {
+  const qp = new URLSearchParams({ method });
+  if (orderNumber) qp.set("order", orderNumber);
+  return `/checkout/success?${qp.toString()}`;
+}
+
 export default function CheckoutModal() {
   const { isOpen, lines, close } = useCheckoutStore();
   const clearCart = useCartStore((s) => s.clearCart);
@@ -79,19 +85,20 @@ export default function CheckoutModal() {
           }),
         });
         if (!res.ok) throw new Error("Failed to place COD order");
+        const data = await res.json().catch(() => ({}));
         clearCart();
         close();
         setForm(emptyForm);
-        router.push("/checkout/success?method=cod");
+        router.push(successUrl("cod", data?.order?.order_number));
       } else {
         await startRazorpayCheckout({
           items: lines.map((l) => ({ size: l.size, qty: l.qty, price: PRODUCT.price })),
           customer: form,
-          onSuccess: () => {
+          onSuccess: (orderNumber) => {
             clearCart();
             close();
             setForm(emptyForm);
-            router.push("/checkout/success?method=prepaid");
+            router.push(successUrl("prepaid", orderNumber));
           },
           onDismiss: () => {
             setSubmitting(false);

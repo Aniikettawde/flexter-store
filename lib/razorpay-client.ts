@@ -41,7 +41,10 @@ export type CustomerDetails = {
 export async function startRazorpayCheckout(opts: {
   items: CheckoutItem[];
   customer: CustomerDetails;
-  onSuccess: () => void;
+  // Called once payment is verified server-side. orderNumber is the
+  // canonical FLX-xxxxxx reference — pass it straight through to whatever
+  // confirmation UI you show next.
+  onSuccess: (orderNumber: string | null) => void;
   onDismiss?: () => void;
 }) {
   const loaded = await loadRazorpayScript();
@@ -88,7 +91,10 @@ export async function startRazorpayCheckout(opts: {
         }),
       });
       if (verifyRes.ok) {
-        opts.onSuccess();
+        const data = await verifyRes.json().catch(() => ({}));
+        // Fall back to the order_number issued at creation time, in case
+        // the verify response is ever missing it for some reason.
+        opts.onSuccess(data.order_number ?? order.order_number ?? null);
       } else {
         alert("Payment could not be verified. If money was deducted, it will be refunded automatically.");
       }
