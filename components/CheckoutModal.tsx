@@ -50,7 +50,9 @@ export default function CheckoutModal() {
   const amount = lines.reduce((sum, l) => sum + l.qty * PRODUCT.price, 0);
   const codCharge = paymentMethod === "cod" ? COD_CHARGE : 0;
   const totalAmount = amount + codCharge;
-  const pincodeValid = isServiceablePincode(form.pincode);
+
+  // Pincode restriction only applies to COD — prepaid ships pan-India.
+  const pincodeValid = paymentMethod === "cod" ? isServiceablePincode(form.pincode) : true;
 
   const handleChange = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -58,17 +60,17 @@ export default function CheckoutModal() {
     if (key === "pincode") setPincodeError(false);
   };
 
-  const handlePincodeBlur = () => {
-    if (form.pincode.trim().length > 0) {
+ const handlePincodeBlur = () => {
+    if (paymentMethod === "cod" && form.pincode.trim().length > 0) {
       setPincodeError(!isServiceablePincode(form.pincode));
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (isSubmittingRef.current) return; // a request is already in flight
-    if (!pincodeValid) {
+    if (isSubmittingRef.current) return;
+    if (paymentMethod === "cod" && !pincodeValid) {
       setPincodeError(true);
       document
         .getElementById("pincode-field")
@@ -153,8 +155,9 @@ export default function CheckoutModal() {
             </div>
 
            <form onSubmit={handleSubmit} className="px-5 sm:px-6 py-6 space-y-4">
-              <p className="text-xs text-dim bg-white/[0.03] border border-line rounded-xl px-3.5 py-2.5">
-                We currently deliver only within Pune (pincodes starting with 411).
+             <p className="text-xs text-dim bg-white/[0.03] border border-line rounded-xl px-3.5 py-2.5">
+                Prepaid orders ship anywhere in India. Cash on delivery is
+                currently available only within Pune (pincodes starting with 411).
               </p>
 
               <Field label="Full name" value={form.name} onChange={handleChange("name")} required />
@@ -179,14 +182,15 @@ export default function CheckoutModal() {
                   />
                 </div>
               </div>
-              {pincodeError && (
+                {pincodeError && (
                 <motion.p
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="text-xs text-red-400 -mt-2"
                 >
-                  Sorry, we only deliver in Pune right now (pincode must start
-                  with 411).
+                  Cash on delivery isn't available here yet — COD only ships
+                  within Pune (pincode must start with 411). Switch to
+                  "Pay online" to ship to this address.
                 </motion.p>
               )}
 
@@ -195,9 +199,12 @@ export default function CheckoutModal() {
                   Payment method
                 </p>
                 <div className="grid grid-cols-2 gap-3">
-                  <button
+                   <button
                     type="button"
-                    onClick={() => setPaymentMethod("prepaid")}
+                    onClick={() => {
+                      setPaymentMethod("prepaid");
+                      setPincodeError(false);
+                    }}
                     aria-pressed={paymentMethod === "prepaid"}
                     className={`h-12 rounded-xl border text-sm font-medium transition-colors ${
                       paymentMethod === "prepaid"
@@ -241,17 +248,17 @@ export default function CheckoutModal() {
                 </div>
               </div>
 
-              <button
+             <button
                 type="submit"
-                disabled={submitting || lines.length === 0 || !pincodeValid}
+                disabled={submitting || lines.length === 0 || (paymentMethod === "cod" && !pincodeValid)}
                 className="w-full h-14 rounded-full bg-paper text-ink font-medium text-sm tracking-wide hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed mt-2"
               >
                 {submitting
                   ? paymentMethod === "cod"
                     ? "Placing order…"
                     : "Opening payment…"
-                  : !pincodeValid
-                  ? "Enter a valid Pune pincode"
+                  : paymentMethod === "cod" && !pincodeValid
+                  ? "Enter a valid Pune pincode for COD"
                   : paymentMethod === "cod"
                   ? `Place order · Pay ₹${totalAmount.toLocaleString("en-IN")} on delivery`
                   : `Pay ₹${amount.toLocaleString("en-IN")}`}
