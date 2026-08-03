@@ -182,15 +182,15 @@ export default function CheckoutModal() {
                   />
                 </div>
               </div>
-                {pincodeError && (
+              {pincodeError && (
                 <motion.p
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="text-xs text-red-400 -mt-2"
                 >
-                  Cash on delivery isn't available here yet — COD only ships
-                  within Pune (pincode must start with 411). Switch to
-                  "Pay online" to ship to this address.
+                  Cash on delivery isn&apos;t available here yet — COD only
+                  ships within Pune (pincode must start with 411). Switch to
+                  &ldquo;Pay online&rdquo; to ship to this address.
                 </motion.p>
               )}
 
