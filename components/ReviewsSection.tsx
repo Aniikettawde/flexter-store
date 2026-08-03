@@ -18,7 +18,7 @@ type Review = {
 const DUMMY_REVIEWS: Review[] = [
   {
     id: "r1",
-    name: "Aditya Sharma",
+    name: "Aditya",
     rating: 5,
     title: "Fits perfectly, great fabric",
     body: "Wasn't expecting the quality to be this good at this price. The fabric feels premium and the fit is exactly true to size. Ordered a medium, fits like it should.",
@@ -28,7 +28,7 @@ const DUMMY_REVIEWS: Review[] = [
   },
   {
     id: "r2",
-    name: "Priya Nair",
+    name: "Priya",
     rating: 4,
     title: "Good quality, delivery was quick",
     body: "Loved the print quality and the fabric feels breathable. Only reason for 4 stars is the color was slightly different from what I saw on screen, but still happy with it.",
@@ -38,7 +38,7 @@ const DUMMY_REVIEWS: Review[] = [
   },
   {
     id: "r3",
-    name: "Rohan Mehta",
+    name: "Rohan",
     rating: 5,
     title: "Bought a second one already",
     body: "First one fit so well I ordered another in a different colorway. Stitching is solid, doesn't feel like it'll wear out after a few washes.",
@@ -57,7 +57,7 @@ const DUMMY_REVIEWS: Review[] = [
   },
   {
     id: "r5",
-    name: "Karan Verma",
+    name: "fit verma",
     rating: 5,
     title: "Worth it",
     body: "Cash on delivery was smooth, packaging was neat, and the tee itself is genuinely nice. Sizing chart was accurate for me.",
@@ -67,7 +67,7 @@ const DUMMY_REVIEWS: Review[] = [
   },
   {
     id: "r6",
-    name: "Ananya Gupta",
+    name: "sam",
     rating: 3,
     title: "Decent, sizing runs slightly large",
     body: "Product itself is nice but runs a little large. Would recommend sizing down if you like a more fitted look.",

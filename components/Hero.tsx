@@ -83,7 +83,7 @@ export default function Hero() {
               <a href="#product"
               className="w-full sm:w-auto text-center px-8 py-3.5 rounded-full bg-paper text-ink font-medium text-sm tracking-wide hover:bg-white transition-colors"
             >
-              Shop the tee — ₹1,499
+              Shop the tee — ₹699
             </a>
             
              <a href="#specs"
