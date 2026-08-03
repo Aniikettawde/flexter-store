@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Unbounded, Inter, JetBrains_Mono } from "next/font/google";
+import Script from "next/script";
+
 import "./globals.css";
 import GrainOverlay from "@/components/GrainOverlay";
 import { PRODUCT } from "@/lib/product";
@@ -138,17 +140,20 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-ink text-paper font-body antialiased selection:bg-paper selection:text-ink">
-        <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-HBT8XEBVEW"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-HBT8XEBVEW"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-HBT8XEBVEW');
+          `}
+        </Script>
 
-  gtag('config', 'G-HBT8XEBVEW');
-</script>
-		
-		<GrainOverlay />
+        <GrainOverlay />
         {children}
       </body>
     </html>
