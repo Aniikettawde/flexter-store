@@ -19,6 +19,9 @@ const emptyForm = {
   pincode: "",
 };
 
+const COD_CHARGE = 50;
+
+
 // We currently only ship out of Pune — every serviceable pincode starts with 411.
 const isServiceablePincode = (pincode: string) => /^411\d{3}$/.test(pincode.trim());
 
@@ -45,6 +48,8 @@ export default function CheckoutModal() {
   const isSubmittingRef = useRef(false);
 
   const amount = lines.reduce((sum, l) => sum + l.qty * PRODUCT.price, 0);
+  const codCharge = paymentMethod === "cod" ? COD_CHARGE : 0;
+  const totalAmount = amount + codCharge;
   const pincodeValid = isServiceablePincode(form.pincode);
 
   const handleChange = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,13 +80,13 @@ export default function CheckoutModal() {
     setSubmitting(true);
     try {
       if (paymentMethod === "cod") {
-        const res = await fetch("/api/orders/cod", {
+       const res = await fetch("/api/orders/cod", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             items: lines.map((l) => ({ size: l.size, qty: l.qty, price: PRODUCT.price })),
             customer: form,
-            amount,
+            amount: totalAmount,
           }),
         });
         if (!res.ok) throw new Error("Failed to place COD order");
@@ -148,11 +153,21 @@ export default function CheckoutModal() {
             </div>
 
             <form onSubmit={handleSubmit} className="px-5 sm:px-6 py-6 space-y-4">
-              <div className="flex items-center justify-between text-sm pb-2">
+             <div className="flex items-center justify-between text-sm">
                 <span className="text-dim">
                   {lines.reduce((s, l) => s + l.qty, 0)} item(s)
                 </span>
                 <span className="font-mono">₹{amount.toLocaleString("en-IN")}</span>
+              </div>
+              {paymentMethod === "cod" && (
+                <div className="flex items-center justify-between text-xs text-dim">
+                  <span>COD charges</span>
+                  <span className="font-mono">₹{COD_CHARGE}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between text-sm font-medium pb-2 pt-1 border-t border-line">
+                <span>Total</span>
+                <span className="font-mono">₹{totalAmount.toLocaleString("en-IN")}</span>
               </div>
 
               <p className="text-xs text-dim bg-white/[0.03] border border-line rounded-xl px-3.5 py-2.5">
@@ -229,14 +244,14 @@ export default function CheckoutModal() {
                 disabled={submitting || lines.length === 0 || !pincodeValid}
                 className="w-full h-14 rounded-full bg-paper text-ink font-medium text-sm tracking-wide hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed mt-2"
               >
-                {submitting
+                                {submitting
                   ? paymentMethod === "cod"
                     ? "Placing order…"
                     : "Opening payment…"
                   : !pincodeValid
                   ? "Enter a valid Pune pincode"
                   : paymentMethod === "cod"
-                  ? `Place order · Pay ₹${amount.toLocaleString("en-IN")} on delivery`
+                  ? `Place order · Pay ₹${totalAmount.toLocaleString("en-IN")} on delivery`
                   : `Pay ₹${amount.toLocaleString("en-IN")}`}
               </button>
               <p className="text-[11px] text-dim text-center pb-2">
