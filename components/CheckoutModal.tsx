@@ -152,24 +152,7 @@ export default function CheckoutModal() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="px-5 sm:px-6 py-6 space-y-4">
-             <div className="flex items-center justify-between text-sm">
-                <span className="text-dim">
-                  {lines.reduce((s, l) => s + l.qty, 0)} item(s)
-                </span>
-                <span className="font-mono">₹{amount.toLocaleString("en-IN")}</span>
-              </div>
-              {paymentMethod === "cod" && (
-                <div className="flex items-center justify-between text-xs text-dim">
-                  <span>COD charges</span>
-                  <span className="font-mono">₹{COD_CHARGE}</span>
-                </div>
-              )}
-              <div className="flex items-center justify-between text-sm font-medium pb-2 pt-1 border-t border-line">
-                <span>Total</span>
-                <span className="font-mono">₹{totalAmount.toLocaleString("en-IN")}</span>
-              </div>
-
+           <form onSubmit={handleSubmit} className="px-5 sm:px-6 py-6 space-y-4">
               <p className="text-xs text-dim bg-white/[0.03] border border-line rounded-xl px-3.5 py-2.5">
                 We currently deliver only within Pune (pincodes starting with 411).
               </p>
@@ -239,12 +222,31 @@ export default function CheckoutModal() {
                 </div>
               </div>
 
+              <div className="pt-2 border-t border-line space-y-1.5">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-dim">
+                    {lines.reduce((s, l) => s + l.qty, 0)} item(s)
+                  </span>
+                  <span className="font-mono">₹{amount.toLocaleString("en-IN")}</span>
+                </div>
+                {paymentMethod === "cod" && (
+                  <div className="flex items-center justify-between text-xs text-dim">
+                    <span>COD charges</span>
+                    <span className="font-mono">₹{COD_CHARGE}</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between text-sm font-medium pt-1">
+                  <span>Total</span>
+                  <span className="font-mono">₹{totalAmount.toLocaleString("en-IN")}</span>
+                </div>
+              </div>
+
               <button
                 type="submit"
                 disabled={submitting || lines.length === 0 || !pincodeValid}
                 className="w-full h-14 rounded-full bg-paper text-ink font-medium text-sm tracking-wide hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed mt-2"
               >
-                                {submitting
+                {submitting
                   ? paymentMethod === "cod"
                     ? "Placing order…"
                     : "Opening payment…"

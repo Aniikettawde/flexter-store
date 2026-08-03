@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import FulfillmentStatusControl from "@/components/admin/FulfillmentStatusControl";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -94,6 +95,14 @@ export default async function AdminOrderDetailPage({
               ₹{(order.amount / 100).toLocaleString("en-IN")}
             </span>
           </div>
+        </div>
+		
+		  <div className="glass-strong rounded-2xl p-6 space-y-3">
+          <h2 className="text-xs uppercase tracking-widest text-dim">Fulfillment</h2>
+          <FulfillmentStatusControl
+            orderId={order.id}
+            currentStatus={order.fulfillment_status}
+          />
         </div>
 
         <div className="glass-strong rounded-2xl p-6 space-y-3">

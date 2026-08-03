@@ -4,6 +4,12 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+const FULFILLMENT_STYLES: Record<string, string> = {
+  received: "bg-white/10 text-dim",
+  shipped: "bg-blue-500/15 text-blue-400",
+  delivered: "bg-green-500/15 text-green-400",
+};
+
 const STATUS_STYLES: Record<string, string> = {
   paid: "bg-green-500/15 text-green-400",
   created: "bg-yellow-500/15 text-yellow-400",
@@ -89,6 +95,8 @@ export default async function AdminOrdersPage({
               <th className="px-4 py-3 font-normal">Amount</th>
               <th className="px-4 py-3 font-normal">Payment</th>
               <th className="px-4 py-3 font-normal">Status</th>
+			                <th className="px-4 py-3 font-normal">Fulfillment</th>
+
               <th className="px-4 py-3 font-normal">Date</th>
             </tr>
           </thead>
@@ -140,6 +148,15 @@ export default async function AdminOrdersPage({
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
+                </td>
+				  <td className="px-4 py-3">
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs capitalize ${
+                      FULFILLMENT_STYLES[order.fulfillment_status] || "bg-white/10 text-dim"
+                    }`}
+                  >
+                    {order.fulfillment_status}
+                  </span>
                 </td>
               </tr>
             ))}

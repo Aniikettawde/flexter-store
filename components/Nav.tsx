@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import { useCartStore } from "@/lib/cart-store";
@@ -36,7 +37,7 @@ export default function Nav() {
             FLEXTER
           </span>
         </a>
-        <nav className="hidden sm:flex items-center gap-8 text-sm text-dim">
+         <nav className="hidden sm:flex items-center gap-8 text-sm text-dim">
           <a href="#product" className="hover:text-paper transition-colors">
             The Tee
           </a>
@@ -46,6 +47,9 @@ export default function Nav() {
           <a href="#faq" className="hover:text-paper transition-colors">
             Shipping
           </a>
+          <Link href="/track" className="hover:text-paper transition-colors">
+            Track order
+          </Link>
         </nav>
         <button
           onClick={openDrawer}
