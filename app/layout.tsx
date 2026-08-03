@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Unbounded, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import GrainOverlay from "@/components/GrainOverlay";
+import { PRODUCT } from "@/lib/product";
 
 const display = Unbounded({
   subsets: ["latin"],
@@ -22,10 +23,62 @@ const mono = JetBrains_Mono({
   display: "swap",
 });
 
+const BASE_URL = "https://flexter.in";
+const OG_IMAGE = `${BASE_URL}${PRODUCT.images[0]}`;
+
 export const metadata: Metadata = {
-  title: "Flexter — Compression Tee",
-  description:
-    "Flexter Compression Tee. Four-way stretch, sweat-wicking, built for the last rep. ₹1,499.",
+  metadataBase: new URL(BASE_URL),
+  title: {
+    default: `${PRODUCT.name} — ₹${PRODUCT.price}`,
+    template: `%s — Flexter`,
+  },
+  description: PRODUCT.description,
+  keywords: [
+    "compression tee",
+    "gym t-shirt",
+    "workout compression shirt",
+    "4-way stretch t-shirt",
+    "sweat wicking t-shirt India",
+    "Flexter",
+  ],
+  applicationName: "Flexter",
+  authors: [{ name: "Flexter" }],
+  alternates: {
+    canonical: BASE_URL,
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    url: BASE_URL,
+    siteName: "Flexter",
+    title: `${PRODUCT.name} — ₹${PRODUCT.price}`,
+    description: PRODUCT.description,
+    images: [
+      {
+        url: OG_IMAGE,
+        width: 1200,
+        height: 1200,
+        alt: PRODUCT.name,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${PRODUCT.name} — ₹${PRODUCT.price}`,
+    description: PRODUCT.description,
+    images: [OG_IMAGE],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+  icons: {
+    icon: "/images/logo.png",
+  },
 };
 
 export const viewport: Viewport = {
@@ -40,8 +93,50 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: PRODUCT.name,
+    image: PRODUCT.images.map((img) => `${BASE_URL}${img}`),
+    description: PRODUCT.description,
+    sku: PRODUCT.sku,
+    brand: {
+      "@type": "Brand",
+      name: "Flexter",
+    },
+    offers: {
+      "@type": "Offer",
+      url: BASE_URL,
+      priceCurrency: PRODUCT.currency,
+      price: PRODUCT.price,
+      availability: "https://schema.org/InStock",
+      itemCondition: "https://schema.org/NewCondition",
+    },
+    // No aggregateRating/review block — the current reviews are hardcoded
+    // placeholder data, not verified customer submissions. Add this back
+    // once reviews are backed by real, stored purchases.
+  };
+
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Flexter",
+    url: BASE_URL,
+    logo: `${BASE_URL}/images/logo.png`,
+  };
+
   return (
     <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+      </head>
       <body className="bg-ink text-paper font-body antialiased selection:bg-paper selection:text-ink">
         <GrainOverlay />
         {children}
