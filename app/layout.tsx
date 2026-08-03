@@ -138,7 +138,17 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-ink text-paper font-body antialiased selection:bg-paper selection:text-ink">
-        <GrainOverlay />
+        <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-HBT8XEBVEW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-HBT8XEBVEW');
+</script>
+		
+		<GrainOverlay />
         {children}
       </body>
     </html>
