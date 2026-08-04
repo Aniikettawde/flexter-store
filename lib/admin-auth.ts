@@ -16,6 +16,17 @@ export function createSessionToken() {
   return `${payload}.${signature}`;
 }
 
+export function safeCompare(a: string, b: string) {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  // Always run a comparison of equal length to avoid leaking length via timing
+  if (bufA.length !== bufB.length) {
+    crypto.timingSafeEqual(bufA, bufA);
+    return false;
+  }
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
 export function verifySessionToken(token: string | undefined | null) {
   if (!token) return false;
   const parts = token.split(".");

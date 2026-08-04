@@ -64,7 +64,7 @@ export default function Hero() {
           >
             ENGINEERED
             <br />
-            <span className="text-dim">PRESSURE.</span>
+            <span className="text-dim">TO PERFORM</span>
           </motion.h1>
 
           <motion.p
@@ -83,7 +83,7 @@ export default function Hero() {
               <a href="#product"
               className="w-full sm:w-auto text-center px-8 py-3.5 rounded-full bg-paper text-ink font-medium text-sm tracking-wide hover:bg-white transition-colors"
             >
-              Shop the tee — ₹699
+             Shop Now →
             </a>
             
              <a href="#specs"

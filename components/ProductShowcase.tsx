@@ -302,8 +302,8 @@ export default function ProductShowcase() {
           </div>
 
           <p className="text-xs text-dim mt-5 pb-32 sm:pb-0">
-            Delivering in Pune only (411 pincodes) · Cash on delivery
-            available · Ships in 2–4 business days
+             Cash on delivery
+            available In Pune Only· Ships in 2–4 business days
           </p>
         </motion.div>
       </div>
